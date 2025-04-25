@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define MAX_POINTS 20
+#define MAX_LENGTH 100
+
+typedef struct {
+    long long x;
+    long long y;
+} Point;
+
+// Convert string `value` from base `base` to decimal
+long long baseToDecimal(const char *value, int base) {
+    long long result = 0;
+    int len = strlen(value);
+
+    for (int i = 0; i < len; i++) {
+        char c = value[i];
+        int digit;
+        if (c >= '0' && c <= '9') digit = c - '0';
+        else if (c >= 'a' && c <= 'f') digit = c - 'a' + 10;
+        else continue;
+
+        result = result * base + digit;
+    }
+
+    return result;
+}
+
+// Lagrange interpolation to find f(0)
+long long lagrangeInterpolation(Point points[], int k) {
+    long long result = 0;
+
+    for (int i = 0; i < k; i++) {
+        long long xi = points[i].x;
+        long long yi = points[i].y;
+
+        long double term = yi;
+
+        for (int j = 0; j < k; j++) {
+            if (i == j) continue;
+            long long xj = points[j].x;
+            term *= (double)(-xj) / (xi - xj);
+        }
+
+        result += (long long)(round(term));
+    }
+
+    return result;
+}
+
+int main() {
+    // Example hardcoded test case (can be read from file)
+    // testcase1.json:
+    int k1 = 3;
+    Point points1[] = {
+        {1, baseToDecimal("4", 10)},
+        {2, baseToDecimal("111", 2)},
+        {3, baseToDecimal("12", 10)}
+    };
+
+    // testcase2.json:
+    int k2 = 7;
+    Point points2[] = {
+        {1, baseToDecimal("13444211440455345511", 6)},
+        {2, baseToDecimal("aed7015a346d63", 15)},
+        {3, baseToDecimal("6aeeb69631c227c", 15)},
+        {4, baseToDecimal("e1b5e05623d881f", 16)},
+        {5, baseToDecimal("316034514573652620673", 8)},
+        {6, baseToDecimal("2122212201122002221120200210011020220200", 3)},
+        {7, baseToDecimal("20120221122211000100210021102001201112121", 3)}
+    };
+
+    long long secret1 = lagrangeInterpolation(points1, k1);
+    long long secret2 = lagrangeInterpolation(points2, k2);
+
+    printf("Secret from Test Case 1: %lld\n", secret1);
+    printf("Secret from Test Case 2: %lld\n", secret2);
+
+    return 0;
+}
